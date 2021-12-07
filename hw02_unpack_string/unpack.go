@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 	"unicode"
+	"unicode/utf8"
 )
 
 var ErrInvalidString = errors.New("invalid string")
@@ -14,64 +15,54 @@ func Unpack(input string) (string, error) {
 		return "", nil
 	}
 
-	runeInput := []rune(input)
-	var output strings.Builder
+	var (
+		output   strings.Builder
+		prevRune rune
+	)
 
-	for i := 0; i < len(runeInput); i++ {
-		currentRune := runeInput[i]
-		if unicode.IsSpace(currentRune) {
-			return "", ErrInvalidString
+	for i, r := range input {
+		validateErr := validate(i, prevRune, r)
+		if validateErr != nil {
+			return "", validateErr
 		}
 
-		if i == 0 && unicode.IsDigit(currentRune) {
-			return "", ErrInvalidString
-		}
-
-		nextRune, err := getNextRune(runeInput, i)
-		if err != nil {
-			if unicode.IsDigit(currentRune) {
+		if unicode.IsDigit(r) {
+			num, _ := strconv.Atoi(string(r))
+			if num == 0 {
+				outputString := output.String()
+				_, size := utf8.DecodeLastRuneInString(outputString)
+				output.Reset()
+				output.WriteString(outputString[:len(outputString)-size])
 				continue
 			}
-		}
 
-		if unicode.IsDigit(currentRune) && unicode.IsDigit(nextRune) {
-			return "", ErrInvalidString
-		}
-
-		num, zeroError := runeToIntWithoutZero(nextRune)
-		if zeroError != nil || unicode.IsDigit(currentRune) {
+			output.Write([]byte(strings.Repeat(string(prevRune), num-1)))
+			prevRune = r
 			continue
 		}
 
-		if unicode.IsDigit(nextRune) && num != 0 {
-			output.Write([]byte(strings.Repeat(string(currentRune), num)))
-			continue
-		}
+		prevRune = r
 
-		output.WriteRune(currentRune)
+		if !unicode.IsDigit(r) {
+			output.WriteRune(r)
+		}
 	}
 
 	return output.String(), nil
 }
 
-func runeToIntWithoutZero(checkedRune rune) (int, error) {
-	if !unicode.IsDigit(checkedRune) {
-		return 0, nil
+func validate(index int, prevR, r rune) error {
+	conditions := []bool{
+		unicode.IsSpace(r),
+		index == 0 && unicode.IsDigit(r),
+		unicode.IsDigit(prevR) && unicode.IsDigit(r),
 	}
 
-	num, _ := strconv.Atoi(string(checkedRune))
-
-	if num == 0 {
-		return 0, errors.New("you can not add the number 0")
+	for _, condition := range conditions {
+		if condition {
+			return ErrInvalidString
+		}
 	}
 
-	return num, nil
-}
-
-func getNextRune(runeInput []rune, i int) (rune, error) {
-	if i == len(runeInput)-1 {
-		return runeInput[i], errors.New("last element")
-	}
-
-	return runeInput[i+1], nil
+	return nil
 }
