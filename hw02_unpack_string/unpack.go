@@ -53,7 +53,6 @@ func Unpack(input string) (string, error) {
 
 func validate(index int, prevR, r rune) error {
 	conditions := []bool{
-		unicode.IsSpace(r),
 		index == 0 && unicode.IsDigit(r),
 		unicode.IsDigit(prevR) && unicode.IsDigit(r),
 	}
