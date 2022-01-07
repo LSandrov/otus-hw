@@ -1,8 +1,9 @@
 package hw03frequencyanalysis
 
 import (
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 // Change to true if needed.
@@ -67,7 +68,7 @@ func TestTop10(t *testing.T) {
 		require.Equal(t, expected, Top10("нога ногу ноги"))
 	})
 
-	t.Run("Слово с большой и маленькой буквы считать за разные слова. \"Нога\" и \"нога\" - это разные слова.", func(t *testing.T) {
+	t.Run("Слово с большой и маленькой буквы считать за разные слова.", func(t *testing.T) {
 		expected := []string{
 			"НОГА",
 			"Нога",
@@ -76,7 +77,7 @@ func TestTop10(t *testing.T) {
 		require.Equal(t, expected, Top10("нога Нога НОГА"))
 	})
 
-	t.Run("Знаки препинания считать \"буквами\" слова или отдельными словами. \"-\" (тире) - это отдельное слово. \"нога,\" и \"нога\" - это разные слова.", func(t *testing.T) {
+	t.Run("Знаки препинания считать \"буквами\" слова или отдельными словами.", func(t *testing.T) {
 		expected := []string{
 			"нога",
 			"нога,",
