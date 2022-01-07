@@ -18,8 +18,8 @@ func Top10(input string) []string {
 		return make([]string, 0)
 	}
 
-	input = r.ReplaceAllString(input, " ")
-	words := strings.Fields(input)
+	replacedInput := r.ReplaceAllString(input, " ")
+	words := strings.Fields(replacedInput)
 	m := make(map[string]int, len(words))
 
 	for _, word := range words {
@@ -42,7 +42,13 @@ func Top10(input string) []string {
 		return topWords[i].c > topWords[j].c
 	})
 
-	top10 := make([]string, 10)
+	topWordsCount := 10
+
+	if len(topWords) < 10 {
+		topWordsCount = len(topWords)
+	}
+
+	top10 := make([]string, topWordsCount)
 
 	for i, tWord := range topWords {
 		if i == 10 {
