@@ -48,6 +48,43 @@ func TestTop10(t *testing.T) {
 		require.Len(t, Top10(""), 0)
 	})
 
+	t.Run("Словом считается набор символов, разделенных пробельными символами.", func(t *testing.T) {
+		expected := []string{
+			"а",
+			"б",
+			"в",
+			"г",
+			"д",
+		}
+		require.Equal(t, expected, Top10("а б в г д"))
+	})
+
+	t.Run("Словоформы не учитываем: \"нога\", \"ногу\", \"ноги\" - это разные слова.", func(t *testing.T) {
+		expected := []string{
+			"нога",
+			"ноги",
+			"ногу",
+		}
+		require.Equal(t, expected, Top10("нога ногу ноги"))
+	})
+
+	t.Run("Слово с большой и маленькой буквы считать за разные слова.", func(t *testing.T) {
+		expected := []string{
+			"НОГА",
+			"Нога",
+			"нога",
+		}
+		require.Equal(t, expected, Top10("нога Нога НОГА"))
+	})
+
+	t.Run("Знаки препинания считать \"буквами\" слова или отдельными словами.", func(t *testing.T) {
+		expected := []string{
+			"нога",
+			"нога,",
+		}
+		require.Equal(t, expected, Top10("нога, нога"))
+	})
+
 	t.Run("positive test", func(t *testing.T) {
 		if taskWithAsteriskIsCompleted {
 			expected := []string{
